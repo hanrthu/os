@@ -302,7 +302,7 @@ print_stackframe(void) {
       *           NOTICE: the calling funciton's return addr eip  = ss:[ebp+4]
       *                   the calling funciton's ebp = ss:[ebp]
    */
-       uint32_t ebp = read_ebp();
+    uint32_t ebp = read_ebp();
     uint32_t eip = read_eip();
     int m,n;
     for(m = 0;m < STACKFRAME_DEPTH && ebp != 0;m++)
