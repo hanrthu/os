@@ -393,7 +393,7 @@ get_pte(pde_t *pgdir, uintptr_t la, bool create) {
         *pdep = pa | PTE_U | PTE_W | PTE_P;
     }
     pte_t *x = KADDR(PDE_ADDR(*pdep));
-    return &x[PTE(la)];
+    return &x[PTX(la)];
 
 }
 //get_page - get related Page struct for linear address la using PDT pgdir
@@ -439,7 +439,7 @@ page_remove_pte(pde_t *pgdir, uintptr_t la, pte_t *ptep) {
                                   //(6) flush tlb
     }
 #endif
-    if(*ptep & PTE_P == 1){
+    if(*ptep & PTE_P){
         struct Page *page = pte2page(*ptep);
         page_ref_dec(page);
         if(page_ref(page) == 0){
