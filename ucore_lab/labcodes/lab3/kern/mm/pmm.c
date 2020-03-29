@@ -39,8 +39,7 @@ struct Page *pages;
 size_t npage = 0;
 
 // virtual address of boot-time page directory
-extern pde_t __boot_pgdir;
-pde_t *boot_pgdir = &__boot_pgdir;
+pde_t *boot_pgdir = NULL;
 // physical address of boot-time page directory
 uintptr_t boot_cr3;
 
