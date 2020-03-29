@@ -39,8 +39,7 @@ struct Page *pages;
 size_t npage = 0;
 
 // virtual address of boot-time page directory
-extern pde_t __boot_pgdir;
-pde_t *boot_pgdir = &__boot_pgdir;
+pde_t *boot_pgdir = NULL;
 // physical address of boot-time page directory
 uintptr_t boot_cr3;
 
@@ -386,7 +385,6 @@ get_pte(pde_t *pgdir, uintptr_t la, bool create) {
     }
     pte_t *x = KADDR(PDE_ADDR(*pdep));
     return &x[PTX(la)];
-
 }
 
 //get_page - get related Page struct for linear address la using PDT pgdir

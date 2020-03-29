@@ -191,7 +191,7 @@ default_free_pages(struct Page *base, size_t n) {
                 p->property = p->property + base->property;
                 base->property = 0;
                 break;
-            }
+            } 
             before = list_prev(before);
             p = le2page(before,page_link);
         }
