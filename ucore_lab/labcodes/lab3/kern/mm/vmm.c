@@ -391,9 +391,6 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
            cprintf("no swap_init_ok but ptep is %x, failed\n",*ptep);
            goto failed;
        }
-
-
-
    }
 #if 0
     /*LAB3 EXERCISE 1: 2016010189*/
