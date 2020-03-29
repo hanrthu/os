@@ -266,7 +266,7 @@ check_pgfault(void) {
     assert(sum == 0);
 
     page_remove(pgdir, ROUNDDOWN(addr, PGSIZE));
-    free_page(pa2page(pgdir[0]));
+    free_page(pde2page(pgdir[0]));
     pgdir[0] = 0;
 
     mm->pgdir = NULL;
@@ -402,7 +402,7 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
         cprintf("get_pte in do_pgfault failed\n");
         goto failed;
     }
-
+    
     if (*ptep == 0) { // if the phy addr isn't exist, then alloc a page & map the phy addr with logical addr
         if (pgdir_alloc_page(mm->pgdir, addr, perm) == NULL) {
             cprintf("pgdir_alloc_page in do_pgfault failed\n");
@@ -416,45 +416,16 @@ do_pgfault(struct mm_struct *mm, uint32_t error_code, uintptr_t addr) {
             if ((ret = swap_in(mm, addr, &page)) != 0) {
                 cprintf("swap_in in do_pgfault failed\n");
                 goto failed;
-            }
+            }    
             page_insert(mm->pgdir, page, addr, perm);
             swap_map_swappable(mm, addr, page, 1);
+            page->pra_vaddr = addr;
         }
         else {
             cprintf("no swap_init_ok but ptep is %x, failed\n",*ptep);
             goto failed;
         }
    }
-    
-//    ptep = get_pte(mm->pgdir,addr,1);
-//    if(ptep == NULL){
-//        cprintf("Get ptep failed!\n");
-//        goto failed;
-//    }
-//    if(*ptep ==0){
-//        struct Page *page = pgdir_alloc_page(mm->pgdir,addr,perm);
-//        if(page == NULL){
-//            cprintf("page alloc failed!\n");
-//            goto failed;
-//        }
-//        *ptep = page2pa(page) | PTE_P | perm;
-//    }else{
-//        if(swap_init_ok){
-//             struct Page *page = NULL;
-//             ret = swap_in(mm,addr,&page);
-//             if(ret != 0){
-//                cprintf("swap failed!\n");
-//                goto failed;
-//            }
-//             page_insert(mm->pgdir,page,addr,perm);
-//             swap_map_swappable(mm,addr,page,1);
-//
-//        }else{
-//            cprintf("no swap_init_ok but ptep is %x, failed\n",*ptep);
-//            goto failed;
-//        }
-//    }
-    
    ret = 0;
 failed:
     return ret;

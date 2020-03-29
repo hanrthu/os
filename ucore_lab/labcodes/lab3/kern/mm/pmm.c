@@ -386,7 +386,6 @@ get_pte(pde_t *pgdir, uintptr_t la, bool create) {
     }
     pte_t *x = KADDR(PDE_ADDR(*pdep));
     return &x[PTX(la)];
-
 }
 
 //get_page - get related Page struct for linear address la using PDT pgdir
