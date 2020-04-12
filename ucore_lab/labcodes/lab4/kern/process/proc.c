@@ -311,7 +311,6 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         panic("canot alloc child proc");
         goto fork_out;
     }
-    int kstack;
     if((setup_kstack(proc)) < 0){
         panic("cannot setup kstack");
         ret = - E_BAD_PROC;
@@ -323,6 +322,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     }
     copy_thread(proc,stack,tf);
     bool intr;
+    proc->parent = current;
     local_intr_restore(intr);
     proc->pid = get_pid();
     hash_proc(proc);
