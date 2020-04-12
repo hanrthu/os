@@ -86,7 +86,7 @@ static struct proc_struct *
 alloc_proc(void) {
     struct proc_struct *proc = kmalloc(sizeof(struct proc_struct));
     if (proc != NULL) {
-    //LAB4:EXERCISE1 YOUR CODE
+    //LAB4:EXERCISE1 2016010189
     /*
      * below fields in proc_struct need to be initialized
      *       enum proc_state state;                      // Process state
@@ -102,6 +102,18 @@ alloc_proc(void) {
      *       uint32_t flags;                             // Process flag
      *       char name[PROC_NAME_LEN + 1];               // Process name
      */
+    proc->state = PROC_UNINIT;
+    proc->pid = -1;
+    proc->runs = 0;
+    proc->kstack = 0;
+    proc->need_resched = 0;
+    proc->parent = NULL;
+    proc->mm = NULL;
+    memset(&(proc->context),0,sizeof(struct context));
+    proc->tf = NULL;
+    proc->cr3 = boot_cr3;
+    proc->flags = 0;
+    memset(&(proc->name),0,sizeof(PROC_NAME_LEN));
     }
     return proc;
 }
@@ -271,7 +283,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
         goto fork_out;
     }
     ret = -E_NO_MEM;
-    //LAB4:EXERCISE2 YOUR CODE
+    //LAB4:EXERCISE2 2016010189
     /*
      * Some Useful MACROs, Functions and DEFINEs, you can use them in below implementation.
      * MACROs or Functions:
@@ -288,7 +300,6 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
      *   proc_list:    the process set's list
      *   nr_process:   the number of process set
      */
-
     //    1. call alloc_proc to allocate a proc_struct
     //    2. call setup_kstack to allocate a kernel stack for child process
     //    3. call copy_mm to dup OR share mm according clone_flag
@@ -296,6 +307,32 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     //    5. insert proc_struct into hash_list && proc_list
     //    6. call wakup_proc to make the new child process RUNNABLE
     //    7. set ret vaule using child proc's pid
+    if((proc = alloc_proc()) == NULL){
+        panic("canot alloc child proc");
+        goto fork_out;
+    }
+    int kstack;
+    if((setup_kstack(proc)) < 0){
+        panic("cannot setup kstack");
+        ret = - E_BAD_PROC;
+        goto bad_fork_cleanup_proc;
+    }
+    if(copy_mm(clone_flags,proc) < 0){
+        panic("cannot copy mm");
+        goto bad_fork_cleanup_kstack;
+    }
+    copy_thread(proc,stack,tf);
+    bool intr;
+    local_intr_restore(intr);
+    proc->pid = get_pid();
+    hash_proc(proc);
+    list_add(&proc_list,&(proc->list_link));
+    nr_process++;
+    local_intr_save(intr);
+
+    proc->state = PROC_RUNNABLE;
+    ret = proc->pid;
+    return ret;
 fork_out:
     return ret;
 
