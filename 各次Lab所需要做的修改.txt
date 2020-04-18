@@ -1,0 +1,5 @@
+Lab1： kdebug.c一处、trap.c两处 共三处
+Lab2： default_pmm.c一处，四个函数、pmm.c两处
+Lab3： vmm.c两处，fifo_swap.c两处
+Lab4： proc.c两处
+Lab5： trap.c两处，pmm.c一处，proc.c三处，
