@@ -420,11 +420,11 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
 	*    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
     */
     if((proc = alloc_proc()) == NULL){
-        assert(current->wait_state == 0);
-        proc->parent = current;
         panic("canot alloc child proc");
         goto fork_out;
     }
+    assert(current->wait_state == 0);
+    proc->parent = current;
     if((setup_kstack(proc)) < 0){
         panic("cannot setup kstack");
         ret = - E_BAD_PROC;

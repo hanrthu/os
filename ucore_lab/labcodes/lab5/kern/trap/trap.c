@@ -232,8 +232,8 @@ trap_dispatch(struct trapframe *tf) {
          *    Every TICK_NUM cycle, you should set current process's current->need_resched = 1
          */
         ticks++;
-        if(ticks % 100 == 0){
-            print_ticks();
+        if(ticks % TICK_NUM == 0){
+            // print_ticks();
             assert(current!=NULL);
             current->need_resched = 1;
         }
