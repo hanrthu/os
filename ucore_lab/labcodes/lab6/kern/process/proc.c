@@ -441,30 +441,31 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
 	*    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
     */
 	if((proc = alloc_proc()) == NULL){
-        panic("canot alloc child proc");
+        // panic("canot alloc child proc");
         goto fork_out;
     }
-    assert(current->wait_state == 0);
     proc->parent = current;
-    if((setup_kstack(proc)) < 0){
-        panic("cannot setup kstack");
-        ret = - E_BAD_PROC;
+    assert(current->wait_state == 0);
+    if((setup_kstack(proc)) != 0){
+        // panic("cannot setup kstack");
+        // ret = - E_BAD_PROC;
         goto bad_fork_cleanup_proc;
     }
-    if(copy_mm(clone_flags,proc) < 0){
-        panic("cannot copy mm");
+    if(copy_mm(clone_flags,proc) != 0){
+        // panic("cannot copy mm");
         goto bad_fork_cleanup_kstack;
     }
     copy_thread(proc,stack,tf);
     bool intr;
-    proc->parent = current;
-    local_intr_restore(intr);
+    // proc->parent = current
+    local_intr_save(intr);{
     proc->pid = get_pid();
     hash_proc(proc);
     set_links(proc);
-    local_intr_save(intr);
-
-    proc->state = PROC_RUNNABLE;
+    }
+    local_intr_restore(intr);
+    wakeup_proc(proc);
+    // proc->state = PROC_RUNNABLE;
     ret = proc->pid;
     return ret;	
 
