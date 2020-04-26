@@ -544,7 +544,11 @@ copy_range(pde_t *to, pde_t *from, uintptr_t start, uintptr_t end, bool share) {
          * (2) find dst_kvaddr: the kernel virtual address of npage
          * (3) memory copy from src_kvaddr to dst_kvaddr, size is PGSIZE
          * (4) build the map of phy addr of  nage with the linear addr start
-         */
+         */  
+        void * src = page2kva(page);
+        void * dst = page2kva(npage);
+        memcpy(dst,src,PGSIZE);
+        ret = page_insert(to,npage,start,perm);
         assert(ret == 0);
         }
         start += PGSIZE;
