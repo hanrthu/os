@@ -144,7 +144,7 @@ stride_proc_tick(struct run_queue *rq, struct proc_struct *proc) {
      /* LAB6: 2016010189 */
     if(proc->time_slice>0)
         proc->time_slice --;
-    else{
+    if (proc->time_slice ==0){
         proc->need_resched = 1;
     }
 }
