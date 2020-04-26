@@ -137,6 +137,7 @@ alloc_proc(void) {
     proc->optr = NULL;
     //Lab6
     proc->rq = NULL;
+    // proc->run_link = NULL;
     proc->run_link.next = NULL;
     proc->run_link.prev = NULL;
     proc->time_slice = 0;
