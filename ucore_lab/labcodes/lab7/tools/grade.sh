@@ -505,7 +505,7 @@ run_test -prog 'forktest'   -check default_check                                
         'I am child 0'                                          \
         'forktest pass.'                                        \
         'all user-mode processes have quit.'                    \
-        'init check memory pass.'                               \
+        # 'init check memory pass.'                               \
     ! - 'fork claimed to work [0-9]+ times!'                    \
     !   'wait stopped early'                                    \
     !   'wait got too many'                                     \
@@ -548,7 +548,7 @@ run_test -prog 'forktree'    -check default_check               \
       - '....: I am '\''1011'\'                                 \
       - '....: I am '\''1010'\'                                 \
         'all user-mode processes have quit.'                    \
-        'init check memory pass.'
+        # 'init check memory pass.'
 
 pts=20
 timeout=150
@@ -627,7 +627,7 @@ run_test -prog 'matrix'     -check default_check                \
         'pid 23 done!.'                                         \
         'matrix pass.'                                          \
         'all user-mode processes have quit.'                    \
-        'init check memory pass.'                               \
+        # 'init check memory pass.'                               \
     ! - 'user panic at .*'
 
 ## print final-score
