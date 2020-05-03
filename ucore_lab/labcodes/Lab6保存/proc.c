@@ -119,26 +119,33 @@ alloc_proc(void) {
      *     uint32_t lab6_stride;                       // FOR LAB6 ONLY: the current stride of the process
      *     uint32_t lab6_priority;                     // FOR LAB6 ONLY: the priority of process, set by lab6_set_priority(uint32_t)
      */
-        proc->state = PROC_UNINIT;
-        proc->pid = -1;
-        proc->runs = 0;
-        proc->kstack = 0;
-        proc->need_resched = 0;
-        proc->parent = NULL;
-        proc->mm = NULL;
-        memset(&(proc->context), 0, sizeof(struct context));
-        proc->tf = NULL;
-        proc->cr3 = boot_cr3;
-        proc->flags = 0;
-        memset(proc->name, 0, PROC_NAME_LEN);
-        proc->wait_state = 0;
-        proc->cptr = proc->optr = proc->yptr = NULL;
-        proc->rq = NULL;
-        proc->run_link.prev = proc->run_link.next = NULL;
-        proc->time_slice = 0;
-        proc->lab6_run_pool.left = proc->lab6_run_pool.right = proc->lab6_run_pool.parent = NULL;
-        proc->lab6_stride = 0;
-        proc->lab6_priority = 0;
+    proc->state = PROC_UNINIT;
+    proc->pid = -1;
+    proc->runs = 0;
+    proc->kstack = 0;
+    proc->need_resched = 0;
+    proc->parent = NULL;
+    proc->mm = NULL;
+    memset(&(proc->context),0,sizeof(struct context));
+    proc->tf = NULL;
+    proc->cr3 = boot_cr3;
+    proc->flags = 0;
+    memset(&(proc->name),0,sizeof(PROC_NAME_LEN));
+    proc->wait_state = 0;
+    proc->cptr = NULL;
+    proc->yptr = NULL;
+    proc->optr = NULL;
+    //Lab6
+    proc->rq = NULL;
+    // proc->run_link = NULL;
+    proc->run_link.next = NULL;
+    proc->run_link.prev = NULL;
+    proc->time_slice = 0;
+    proc->lab6_run_pool.left = NULL;
+    proc->lab6_run_pool.parent = NULL;
+    proc->lab6_run_pool.right = NULL;
+    proc->lab6_stride = 0;
+    proc->lab6_priority = 0;
 
     }
     return proc;
@@ -434,33 +441,32 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
 	*    update step 1: set child proc's parent to current process, make sure current process's wait_state is 0
 	*    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
     */
-	if ((proc = alloc_proc()) == NULL) {
+	if((proc = alloc_proc()) == NULL){
+        // panic("canot alloc child proc");
         goto fork_out;
     }
-
     proc->parent = current;
     assert(current->wait_state == 0);
-
-    if (setup_kstack(proc) != 0) {
+    if((setup_kstack(proc)) != 0){
+        // panic("cannot setup kstack");
+        // ret = - E_BAD_PROC;
         goto bad_fork_cleanup_proc;
     }
-    if (copy_mm(clone_flags, proc) != 0) {
+    if(copy_mm(clone_flags,proc) != 0){
+        // panic("cannot copy mm");
         goto bad_fork_cleanup_kstack;
     }
-    copy_thread(proc, stack, tf);
-
-    bool intr_flag;
-    local_intr_save(intr_flag);
-    {
-        proc->pid = get_pid();
-        hash_proc(proc);
-        set_links(proc);
-
+    copy_thread(proc,stack,tf);
+    bool intr;
+    // proc->parent = current
+    local_intr_save(intr);{
+    proc->pid = get_pid();
+    hash_proc(proc);
+    set_links(proc);
     }
-    local_intr_restore(intr_flag);
-
+    local_intr_restore(intr);
     wakeup_proc(proc);
-
+    // proc->state = PROC_RUNNABLE;
     ret = proc->pid;
     return ret;	
 
@@ -666,7 +672,7 @@ load_icode(unsigned char *binary, size_t size) {
     tf->tf_ds = tf->tf_es = tf->tf_ss = USER_DS;
     tf->tf_esp = USTACKTOP;
     tf->tf_eip = elf->e_entry;
-    tf->tf_eflags = FL_IF;        
+    tf->tf_eflags = FL_IF;            
     ret = 0;
 out:
     return ret;
